@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import "./App.css";
 
@@ -15,6 +14,7 @@ function App() {
       setLoading(true);
       setError("");
 
+      // Step 1: Get a real traffic record from UNSW-NB15
       const sampleResponse = await fetch(
         "http://127.0.0.1:5000/sample"
       );
@@ -25,6 +25,7 @@ function App() {
 
       const sampleData = await sampleResponse.json();
 
+      // Step 2: Send traffic to Random Forest model
       const predictResponse = await fetch(
         "http://127.0.0.1:5000/predict",
         {
@@ -42,6 +43,17 @@ function App() {
 
       const prediction = await predictResponse.json();
 
+      // Step 3: Generate alert when an attack is detected
+      if (prediction.prediction === "ATTACK") {
+        alert(
+          `🚨 CYBER THREAT DETECTED!\n\n` +
+          `Protocol: ${sampleData.traffic.proto}\n` +
+          `Category: ${sampleData.attack_category}\n` +
+          `Confidence: ${prediction.confidence}%`
+        );
+      }
+
+      // Step 4: Display traffic information
       setTraffic(sampleData.traffic);
       setResult(prediction);
 
@@ -50,6 +62,7 @@ function App() {
         actualLabel: sampleData.actual_label,
       });
 
+      // Step 5: Add result to threat history
       const newRecord = {
         time: new Date().toLocaleTimeString(),
         protocol: sampleData.traffic.proto,
@@ -61,6 +74,7 @@ function App() {
       setHistory((previous) => {
         return [newRecord, ...previous].slice(0, 10);
       });
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -95,6 +109,7 @@ function App() {
   return (
     <div className="app">
 
+      {/* HEADER */}
       <header className="top-header">
 
         <div className="brand-area">
@@ -123,29 +138,42 @@ function App() {
 
       <main className="dashboard">
 
-        {/* MODEL INFORMATION */}
-
+        {/* PROJECT INFORMATION */}
         <section className="info-grid">
 
           <div className="info-card">
             <span className="info-label">MODEL</span>
-            <strong>Random Forest</strong>
+
+            <strong>
+              Random Forest
+            </strong>
+
             <span className="info-sub">
               Machine Learning Classifier
             </span>
           </div>
 
+
           <div className="info-card">
             <span className="info-label">DATASET</span>
-            <strong>UNSW-NB15</strong>
+
+            <strong>
+              UNSW-NB15
+            </strong>
+
             <span className="info-sub">
               Network Traffic Dataset
             </span>
           </div>
 
+
           <div className="info-card">
             <span className="info-label">CLASSIFICATION</span>
-            <strong>Binary</strong>
+
+            <strong>
+              Binary
+            </strong>
+
             <span className="info-sub">
               Normal vs Attack
             </span>
@@ -155,53 +183,87 @@ function App() {
 
 
         {/* STATISTICS */}
-
         <section className="stats-grid">
 
           <div className="stat-card">
-            <div className="stat-icon">A</div>
+
+            <div className="stat-icon">
+              A
+            </div>
 
             <div>
-              <span>Total Analyzed</span>
-              <strong>{history.length}</strong>
+              <span>
+                Total Analyzed
+              </span>
+
+              <strong>
+                {history.length}
+              </strong>
             </div>
+
           </div>
 
 
           <div className="stat-card danger-stat">
-            <div className="stat-icon">!</div>
+
+            <div className="stat-icon">
+              !
+            </div>
 
             <div>
-              <span>Threats Detected</span>
-              <strong>{threatCount}</strong>
+              <span>
+                Threats Detected
+              </span>
+
+              <strong>
+                {threatCount}
+              </strong>
             </div>
+
           </div>
 
 
           <div className="stat-card safe-stat">
-            <div className="stat-icon">✓</div>
+
+            <div className="stat-icon">
+              ✓
+            </div>
 
             <div>
-              <span>Normal Traffic</span>
-              <strong>{normalCount}</strong>
+              <span>
+                Normal Traffic
+              </span>
+
+              <strong>
+                {normalCount}
+              </strong>
             </div>
+
           </div>
 
 
           <div className="stat-card">
-            <div className="stat-icon">%</div>
+
+            <div className="stat-icon">
+              %
+            </div>
 
             <div>
-              <span>Threat Rate</span>
-              <strong>{threatRate}%</strong>
+              <span>
+                Threat Rate
+              </span>
+
+              <strong>
+                {threatRate}%
+              </strong>
             </div>
+
           </div>
 
         </section>
 
 
-        {/* ANALYZER */}
-
+        {/* ANALYZER HEADER */}
         <section className="analyzer-header">
 
           <div>
@@ -228,41 +290,48 @@ function App() {
             onClick={analyzeTraffic}
             disabled={loading}
           >
-            {loading ? "Analyzing..." : "Analyze Traffic"}
 
-            {!loading && <span>→</span>}
+            {loading
+              ? "Analyzing..."
+              : "Analyze Traffic"}
+
+            {!loading && (
+              <span>
+                →
+              </span>
+            )}
+
           </button>
 
         </section>
 
 
         {/* ERROR */}
-
         {error && (
 
           <div className="error-card">
 
-            <strong>Analysis Error</strong>
+            <strong>
+              Analysis Error
+            </strong>
 
-            <span>{error}</span>
+            <span>
+              {error}
+            </span>
 
           </div>
 
         )}
 
 
-        {/* RESULTS */}
-
+        {/* ANALYSIS RESULTS */}
         {traffic && result && (
 
           <>
 
-            {/* TRAFFIC + RESULT */}
-
             <section className="analysis-grid">
 
-              {/* TRAFFIC */}
-
+              {/* TRAFFIC DETAILS */}
               <div className="panel traffic-panel">
 
                 <div className="panel-header">
@@ -289,56 +358,87 @@ function App() {
                 <div className="traffic-metrics">
 
                   <div className="traffic-metric">
-                    <span>Protocol</span>
+                    <span>
+                      Protocol
+                    </span>
+
                     <strong>
                       {traffic.proto}
                     </strong>
                   </div>
 
+
                   <div className="traffic-metric">
-                    <span>Connection State</span>
+                    <span>
+                      Connection State
+                    </span>
+
                     <strong>
                       {traffic.state}
                     </strong>
                   </div>
 
+
                   <div className="traffic-metric">
-                    <span>Source Packets</span>
+                    <span>
+                      Source Packets
+                    </span>
+
                     <strong>
                       {traffic.spkts}
                     </strong>
                   </div>
 
+
                   <div className="traffic-metric">
-                    <span>Destination Packets</span>
+                    <span>
+                      Destination Packets
+                    </span>
+
                     <strong>
                       {traffic.dpkts}
                     </strong>
                   </div>
 
+
                   <div className="traffic-metric">
-                    <span>Source Bytes</span>
+                    <span>
+                      Source Bytes
+                    </span>
+
                     <strong>
                       {traffic.sbytes}
                     </strong>
                   </div>
 
+
                   <div className="traffic-metric">
-                    <span>Destination Bytes</span>
+                    <span>
+                      Destination Bytes
+                    </span>
+
                     <strong>
                       {traffic.dbytes}
                     </strong>
                   </div>
 
+
                   <div className="traffic-metric">
-                    <span>Traffic Rate</span>
+                    <span>
+                      Traffic Rate
+                    </span>
+
                     <strong>
                       {Number(traffic.rate).toFixed(2)}
                     </strong>
                   </div>
 
+
                   <div className="traffic-metric">
-                    <span>Duration</span>
+                    <span>
+                      Duration
+                    </span>
+
                     <strong>
                       {Number(traffic.dur).toFixed(6)}
                     </strong>
@@ -374,8 +474,7 @@ function App() {
               </div>
 
 
-              {/* RESULT */}
-
+              {/* AI RESULT */}
               <div
                 className={
                   "panel result-panel " +
@@ -420,9 +519,11 @@ function App() {
                       )
                     }
                   >
+
                     {result.prediction === "ATTACK"
                       ? "!"
                       : "✓"}
+
                   </div>
 
 
@@ -447,6 +548,7 @@ function App() {
                 </div>
 
 
+                {/* CONFIDENCE */}
                 <div className="confidence-section">
 
                   <div className="confidence-header">
@@ -483,6 +585,7 @@ function App() {
                 </div>
 
 
+                {/* RESULT MESSAGE */}
                 <div
                   className={
                     "result-message " +
@@ -524,7 +627,6 @@ function App() {
 
 
             {/* DATASET CATEGORIES */}
-
             <section className="panel category-panel">
 
               <div className="panel-header">
@@ -627,7 +729,6 @@ function App() {
 
 
             {/* MODEL PERFORMANCE */}
-
             <section className="panel performance-panel">
 
               <div className="panel-header">
@@ -742,23 +843,46 @@ function App() {
               <div className="model-meta-grid">
 
                 <div>
-                  <span>MODEL</span>
-                  <strong>Random Forest</strong>
+                  <span>
+                    MODEL
+                  </span>
+
+                  <strong>
+                    Random Forest
+                  </strong>
                 </div>
 
-                <div>
-                  <span>DATASET</span>
-                  <strong>UNSW-NB15</strong>
-                </div>
 
                 <div>
-                  <span>CLASSIFICATION</span>
-                  <strong>Binary</strong>
+                  <span>
+                    DATASET
+                  </span>
+
+                  <strong>
+                    UNSW-NB15
+                  </strong>
                 </div>
 
+
                 <div>
-                  <span>TEST RECORDS</span>
-                  <strong>82,332</strong>
+                  <span>
+                    CLASSIFICATION
+                  </span>
+
+                  <strong>
+                    Binary
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    TEST RECORDS
+                  </span>
+
+                  <strong>
+                    82,332
+                  </strong>
                 </div>
 
               </div>
@@ -766,7 +890,9 @@ function App() {
 
               <div className="evaluation-note">
 
-                <span>i</span>
+                <span>
+                  i
+                </span>
 
                 <p>
                   These metrics were calculated using the official
@@ -779,8 +905,7 @@ function App() {
             </section>
 
 
-            {/* HISTORY */}
-
+            {/* THREAT HISTORY */}
             <section className="panel history-panel">
 
               <div className="panel-header">
@@ -808,7 +933,9 @@ function App() {
 
                 <div className="empty-history">
 
-                  <div>◌</div>
+                  <div>
+                    ◌
+                  </div>
 
                   <strong>
                     No traffic analyzed yet
@@ -841,48 +968,52 @@ function App() {
 
                     <tbody>
 
-                      {history.map((item, index) => (
+                      {history.map(
+                        (item, index) => (
 
-                        <tr key={`${item.time}-${index}`}>
+                          <tr
+                            key={`${item.time}-${index}`}
+                          >
 
-                          <td>
-                            {item.time}
-                          </td>
+                            <td>
+                              {item.time}
+                            </td>
 
-                          <td>
-                            <span className="protocol-tag">
-                              {item.protocol}
-                            </span>
-                          </td>
+                            <td>
+                              <span className="protocol-tag">
+                                {item.protocol}
+                              </span>
+                            </td>
 
-                          <td>
+                            <td>
 
-                            <span
-                              className={
-                                "status-tag " +
-                                (
-                                  item.status === "ATTACK"
-                                    ? "status-attack"
-                                    : "status-normal"
-                                )
-                              }
-                            >
-                              {item.status}
-                            </span>
+                              <span
+                                className={
+                                  "status-tag " +
+                                  (
+                                    item.status === "ATTACK"
+                                      ? "status-attack"
+                                      : "status-normal"
+                                  )
+                                }
+                              >
+                                {item.status}
+                              </span>
 
-                          </td>
+                            </td>
 
-                          <td>
-                            {item.category}
-                          </td>
+                            <td>
+                              {item.category}
+                            </td>
 
-                          <td>
-                            {item.confidence}%
-                          </td>
+                            <td>
+                              {item.confidence}%
+                            </td>
 
-                        </tr>
+                          </tr>
 
-                      ))}
+                        )
+                      )}
 
                     </tbody>
 
@@ -899,6 +1030,7 @@ function App() {
         )}
 
 
+        {/* FOOTER */}
         <footer>
 
           <span>
