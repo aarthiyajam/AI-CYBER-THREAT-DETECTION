@@ -12,7 +12,7 @@ The system consists of:
 * **Random Forest** machine learning model
 * **Flask** backend API
 * **React + Vite** frontend dashboard
-* Real-time-style traffic analysis using records from the official testing dataset
+* Real network traffic analysis using records from the UNSW-NB15 testing dataset
 
 ## System Architecture
 
@@ -68,22 +68,27 @@ The original dataset also contains attack categories such as:
 * Shellcode
 * Worms
 
-These categories are displayed as the original dataset labels; the current ML model itself performs binary Normal/Attack classification.
+These categories are displayed as the original dataset labels. The current machine learning model itself performs binary **Normal vs Attack** classification.
 
 ## Model
 
 The project uses a **Random Forest Classifier**.
 
-Preprocessing includes:
+### Preprocessing
 
-* Removal of `id` and `attack_cat`
+The preprocessing pipeline includes:
+
+* Removal of `id`
+* Removal of `attack_cat` from model input
 * One-hot encoding of categorical features
-* Numerical feature processing
+* Processing of numerical features
 * Stratified train/test splitting
 
-### Official Test Set Results
+The trained model and preprocessing pipeline are stored in the `model/` directory.
 
-Evaluation was performed on the official UNSW-NB15 testing set containing **82,332 records**.
+## Official Test Set Results
+
+The model was evaluated using the official UNSW-NB15 testing set containing **82,332 records**.
 
 | Metric        |     Result |
 | ------------- | ---------: |
@@ -93,11 +98,13 @@ Evaluation was performed on the official UNSW-NB15 testing set containing **82,3
 
 ### Interpretation
 
-The model correctly identifies a high proportion of attack traffic, with an **attack recall of 98.45%**.
+The model achieved an overall test accuracy of **87.09%**.
 
-The overall test accuracy is **87.09%**.
+The **98.45% attack recall** indicates that a high proportion of attack records in the official testing set were correctly identified.
 
-Individual prediction confidence values shown by the dashboard represent the model's probability estimate for a particular traffic record and should not be confused with the overall test accuracy.
+The **73.18% normal recall** indicates the proportion of normal records correctly classified as normal.
+
+Individual prediction confidence values displayed by the dashboard are probability estimates for individual traffic records and are different from the overall test accuracy.
 
 ## Web Dashboard
 
@@ -110,6 +117,7 @@ The React dashboard provides:
 * Threat monitoring history
 * Model performance metrics
 * System status
+* Real-time-style analysis of sampled test records
 
 ## Technology Stack
 
@@ -163,6 +171,7 @@ AI-CYBER-THREAT-DETECTION/
 │   └── UNSW_NB15_testing-set.csv
 │
 ├── frontend/
+│   ├── public/
 │   ├── src/
 │   │   ├── App.jsx
 │   │   ├── App.css
@@ -180,17 +189,24 @@ AI-CYBER-THREAT-DETECTION/
 
 ## How to Run
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/aarthiyajam/AI-CYBER-THREAT-DETECTION.git
 cd AI-CYBER-THREAT-DETECTION
 ```
 
-### 2. Set up the Python backend
+### 2. Set Up the Python Backend
+
+Navigate to the backend:
 
 ```bash
 cd backend
+```
+
+Create a virtual environment:
+
+```bash
 python -m venv .venv
 ```
 
@@ -200,35 +216,47 @@ Activate the environment on Windows:
 .venv\Scripts\Activate.ps1
 ```
 
-Install dependencies:
+Install the required Python packages:
 
 ```bash
 python -m pip install pandas numpy scikit-learn joblib flask flask-cors requests
 ```
 
-Start the backend:
+Start the Flask backend:
 
 ```bash
 python app.py
 ```
 
-The API runs at:
+The API will run at:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-### 3. Start the React frontend
+### 3. Start the React Frontend
 
-Open a **new terminal** in the project root:
+Open a **new terminal** in the project root.
 
-```powershell
+Navigate to the frontend:
+
+```bash
 cd frontend
+```
+
+Install the frontend dependencies:
+
+```bash
 npm install
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-Open the URL shown by Vite in the terminal.
+Open the URL displayed by Vite in the terminal.
 
 ## API Endpoints
 
@@ -254,7 +282,9 @@ Returns a randomly selected record from the UNSW-NB15 testing dataset.
 POST /predict
 ```
 
-Accepts network traffic features and returns:
+Accepts network traffic features and returns the model prediction and confidence.
+
+Example response:
 
 ```json
 {
@@ -263,6 +293,20 @@ Accepts network traffic features and returns:
 }
 ```
 
+## Model Output
+
+The model provides two possible classifications:
+
+### NORMAL
+
+The analyzed traffic is classified as normal based on the learned patterns.
+
+### ATTACK
+
+The analyzed traffic is classified as potential attack traffic based on the learned patterns.
+
+The dashboard also displays the original UNSW-NB15 `attack_cat` value associated with sampled test records. This is the dataset's original category and is not a prediction from the current binary classifier.
+
 ## Future Improvements
 
 Potential future improvements include:
@@ -270,11 +314,19 @@ Potential future improvements include:
 * Multi-class attack category prediction
 * Real-time packet capture
 * Live network traffic monitoring
-* More advanced ML/deep learning models
-* Model comparison and benchmarking
+* Additional machine learning model comparison
+* Deep learning approaches
+* False-positive reduction
 * Alert notifications
 * Database-based threat history
-* Improved false-positive reduction
+* Network flow visualization
+* Improved security monitoring features
+
+## Limitations
+
+* The current model performs binary classification rather than multi-class attack identification.
+* The dashboard analyzes sampled records from the UNSW-NB15 testing dataset rather than capturing live network packets.
+* The system is intended as an educational/research prototype and is not a production-grade intrusion detection system.
 
 ## Disclaimer
 
