@@ -1,3 +1,4 @@
+
 import os
 
 # Limit numerical libraries to one thread
@@ -14,18 +15,24 @@ import pandas as pd
 app = Flask(__name__)
 CORS(app)
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+MODEL_DIR = os.path.join(BASE_DIR, "model")
+DATASET_DIR = os.path.join(BASE_DIR, "dataset")
+
+MODEL_PATH = os.path.join(MODEL_DIR, "random_forest_model.pkl")
+PREPROCESSOR_PATH = os.path.join(MODEL_DIR, "preprocessor.pkl")
+DATASET_PATH = os.path.join(DATASET_DIR, "UNSW_NB15_testing-set.csv")
+
 print("Loading trained model...")
 
-# Load model
-model = joblib.load("../model/random_forest_model.pkl")
+model = joblib.load(MODEL_PATH)
 print("Model loaded successfully!")
 
-# Load preprocessor
-preprocessor = joblib.load("../model/preprocessor.pkl")
+preprocessor = joblib.load(PREPROCESSOR_PATH)
 print("Preprocessor loaded successfully!")
 
-# Read only the columns needed for sample traffic
-dataset = pd.read_csv("../dataset/UNSW_NB15_testing-set.csv")
+dataset = pd.read_csv(DATASET_PATH)
 
 print("Dataset loaded successfully!")
 print("Total testing records:", len(dataset))
@@ -69,21 +76,20 @@ def predict():
 
     data = request.get_json()
 
+    if not data:
+        return {"error": "No traffic data received"}, 400
+
     input_data = pd.DataFrame([data])
 
     processed_data = preprocessor.transform(input_data)
 
     prediction = model.predict(processed_data)[0]
-
     probability = model.predict_proba(processed_data)[0]
 
     if prediction == 1:
-
         result = "ATTACK"
         confidence = probability[1] * 100
-
     else:
-
         result = "NORMAL"
         confidence = probability[0] * 100
 
@@ -97,9 +103,11 @@ if __name__ == "__main__":
 
     print("Starting Flask server...")
 
+    port = int(os.environ.get("PORT", 5000))
+
     app.run(
-        host="127.0.0.1",
-        port=5000,
+        host="0.0.0.0",
+        port=port,
         debug=False,
         threaded=False
     )
